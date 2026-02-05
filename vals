@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Valentine 💘</title>
+
+<style>
+/* 🚫 Desktop lock */
+@media (min-width: 768px) {
+  body {
+    background: #000;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+  }
+  body::before {
+    content: "💌 Please open this on your phone";
+    font-size: 1.4rem;
+  }
+  .app { display: none; }
+}
+
+/* 📱 Mobile app */
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.app {
+  height: 100vh;
+  width: 100%;
+  background: linear-gradient(180deg, #ffdde1, #ee9ca7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* 💕 Floating hearts */
+.heart {
+  position: absolute;
+  bottom: -20px;
+  animation: floatUp 6s linear infinite;
+  opacity: 0.8;
+}
+
+@keyframes floatUp {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-120vh); opacity: 0; }
+}
+
+.container {
+  text-align: center;
+  width: 90%;
+  max-width: 420px;
+  z-index: 2;
+}
+
+h1 {
+  color: #b0003a;
+  font-size: 2rem;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  font-size: 1.1rem;
+  margin: 10px 0;
+  border-radius: 14px;
+  border: none;
+}
+
+button {
+  padding: 16px 28px;
+  font-size: 1.1rem;
+  border-radius: 16px;
+  border: none;
+  margin: 10px;
+  transition: all 0.3s ease;
+}
+
+#will {
+  background: #ff4d6d;
+  color: white;
+  position: relative;
+  z-index: 2;
+}
+
+#yes {
+  background: #999;
+  color: white;
+  position: absolute;
+  z-index: 1;
+}
+
+.word-btn {
+  background: #ff4d6d;
+  color: white;
+}
+
+#preview {
+  margin-top: 20px;
+  font-size: 1.3rem;
+  color: #7a0033;
+  min-height: 32px;
+}
+
+#shareBtn {
+  background: #b0003a;
+  color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <div class="container" id="main">
+    <h1>Before we begin 💌</h1>
+    <input id="userName" placeholder="Your name" />
+    <input id="crushName" placeholder="Who do you think is asking you out?" />
+    <button onclick="start()">Start 💖</button>
+  </div>
+</div>
+
+<script>
+/* 💕 Floating hearts */
+setInterval(() => {
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.textContent = "❤️";
+  heart.style.left = Math.random() * 100 + "vw";
+  heart.style.fontSize = Math.random() * 18 + 18 + "px";
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 6000);
+}, 600);
+
+let userName = "";
+let crushName = "";
+let willScale = 1;
+let finalSentence = "";
+
+function start() {
+  userName = document.getElementById("userName").value || "You";
+  crushName = document.getElementById("crushName").value || "Me";
+
+  document.getElementById("main").innerHTML = `
+    <h1>
+      <button id="will">Will</button>
+      you be my Valentine? 💖
+    </h1>
+    <button id="yes">Yes</button>
+    <div id="preview"></div>
+  `;
+
+  setupButtons();
+}
+
+function setupButtons() {
+  const willBtn = document.getElementById("will");
+  const yesBtn = document.getElementById("yes");
+
+  yesBtn.addEventListener("mouseenter", moveYes);
+  yesBtn.addEventListener("touchstart", moveYes);
+
+  function moveYes() {
+    yesBtn.style.left = Math.random() * 220 + "px";
+    yesBtn.style.top = Math.random() * 160 + "px";
+    willScale += 0.35;
+    willBtn.style.transform = `scale(${willScale})`;
+  }
+
+  willBtn.addEventListener("click", startWords);
+}
+
+function startWords() {
+  const main = document.getElementById("main");
+
+  main.innerHTML = `
+    <h1>Tap to finish the question 💌</h1>
+    <div id="preview"></div>
+  `;
+
+  const preview = document.getElementById("preview");
+  const words = ["will", "you", "be", "my", "valentine"];
+  let index = 0;
+  let sentence = [];
+
+  const btn = document.createElement("button");
+  btn.className = "word-btn";
+  btn.textContent = words[index];
+  main.appendChild(btn);
+
+  btn.addEventListener("click", () => {
+    sentence.push(words[index]);
+    preview.textContent = sentence.join(" ");
+
+    index++;
+    if (index < words.length) {
+      btn.textContent = words[index];
+    } else {
+      finalSentence = sentence.join(" ");
+      showFinal();
+    }
+  });
+}
+
+function showFinal() {
+  document.getElementById("main").innerHTML = `
+    <h1>💖</h1>
+    <p><strong>${userName}:</strong><br>${finalSentence}</p>
+    <p><strong>${crushName}:</strong><br>wow… I am flattered 💕<br>and I accept 💘</p>
+    <button id="shareBtn" onclick="shareResult()">Share 💌</button>
+  `;
+}
+
+function shareResult() {
+  const text = `${userName}: ${finalSentence}\n\n${crushName}: wow… I am flattered and I accept 💘`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: "Valentine 💖",
+      text: text,
+      url: window.location.href
+    });
+  } else {
+    alert("Sharing is not supported on this device 💔");
+  }
+}
+</script>
+
+</body>
+</html>
