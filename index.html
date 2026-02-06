@@ -102,9 +102,9 @@ button {
   font-size: 1.1rem;
   border-radius: 16px;
   border: none;
-  margin: 10px;
   transition: all 0.3s ease;
   cursor: pointer;
+  display: inline-block;
 }
 
 #will {
@@ -113,21 +113,22 @@ button {
   position: relative;
   z-index: 3;
   transition: transform 0.3s ease;
+  margin: 10px;
 }
 
 #yes {
   background: #ff4d6d;
   color: white;
-  position: relative;
-  margin: 20px auto;
-  display: block;
+  position: absolute;
   z-index: 2;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  margin: 0;
 }
 
 .word-btn {
   background: #ff4d6d;
   color: white;
+  margin: 10px;
 }
 
 #preview {
@@ -227,10 +228,25 @@ button {
   z-index: 2;
 }
 
-.button-container {
+.game-area {
   position: relative;
-  min-height: 120px;
-  margin: 20px 0;
+  height: 250px;
+  width: 100%;
+  margin: 30px 0;
+  border: 2px dashed rgba(255, 77, 109, 0.3);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.center-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  opacity: 0.2;
+  z-index: 1;
 }
 
 .ask-container {
@@ -281,11 +297,12 @@ function start() {
         <button id="will">Will</button>
         you be my Valentine? 💖
       </h1>
-      <div class="button-container">
+      <div class="game-area">
+        <div class="center-marker">❤️</div>
         <button id="yes">Yes</button>
       </div>
       <div id="preview"></div>
-      <div class="dodge-message">Try to click "Yes"... it's shy! 😳</div>
+      <div class="dodge-message">Try to click "Yes"... it's shy! 😳<br>(Only moves in the middle area)</div>
     </div>
   `;
 
@@ -298,17 +315,18 @@ function setupButtons() {
   
   // Reset scale
   willScale = 1;
+  clickCount = 0;
   willButton.style.transform = `scale(${willScale})`;
   willButton.style.backgroundColor = '#ff4d6d';
 
-  // Set initial position for Yes button
-  moveYes();
+  // Set initial position for Yes button in the center
+  positionYesInCenter();
 
-  // Event listeners for Yes button - move when hovered or clicked
-  yesButton.addEventListener("mouseenter", moveYes);
+  // Event listeners for Yes button
+  yesButton.addEventListener("mouseenter", moveYesAroundCenter);
   yesButton.addEventListener("touchstart", function(e) {
     e.preventDefault();
-    moveYes();
+    moveYesAroundCenter();
   });
   yesButton.addEventListener("click", function(e) {
     e.preventDefault();
@@ -316,56 +334,74 @@ function setupButtons() {
     
     // Change the button text based on click count
     if (clickCount === 1) {
-      yesButton.innerHTML = "Oops! 😅";
+      yesButton.innerHTML = "Nope! 😅";
     } else if (clickCount === 2) {
-      yesButton.innerHTML = "Too slow! 🏃‍♂️";
+      yesButton.innerHTML = "Missed! 🎯";
     } else if (clickCount === 3) {
-      yesButton.innerHTML = "Almost! 😜";
+      yesButton.innerHTML = "Too slow! 🏃‍♂️";
     } else {
       yesButton.innerHTML = "Try again! 💕";
     }
     
-    moveYes();
+    moveYesAroundCenter();
   });
 
   // Make Will button clickable to proceed
   willButton.addEventListener("click", startWords);
 }
 
-function moveYes() {
-  // Get container dimensions
-  const container = document.querySelector('.button-container');
-  const containerRect = container.getBoundingClientRect();
+function positionYesInCenter() {
+  const gameArea = document.querySelector('.game-area');
+  const gameAreaRect = gameArea.getBoundingClientRect();
   const buttonRect = yesButton.getBoundingClientRect();
   
-  // Calculate available space (considering button size)
-  const maxX = containerRect.width - buttonRect.width - 20;
-  const maxY = containerRect.height - buttonRect.height - 20;
+  // Position button in center
+  const centerX = (gameAreaRect.width - buttonRect.width) / 2;
+  const centerY = (gameAreaRect.height - buttonRect.height) / 2;
   
-  // Generate random position within container
-  const randomX = Math.max(10, Math.random() * maxX);
-  const randomY = Math.max(10, Math.random() * maxY);
+  yesButton.style.left = centerX + "px";
+  yesButton.style.top = centerY + "px";
+}
+
+function moveYesAroundCenter() {
+  const gameArea = document.querySelector('.game-area');
+  const gameAreaRect = gameArea.getBoundingClientRect();
+  const buttonRect = yesButton.getBoundingClientRect();
   
-  // Apply position with transform for better performance
-  yesButton.style.transform = `translate(${randomX}px, ${randomY}px)`;
-  yesButton.style.transition = 'transform 0.3s ease';
+  // Define the middle area (60% of the game area)
+  const middleAreaWidth = gameAreaRect.width * 0.6;
+  const middleAreaHeight = gameAreaRect.height * 0.6;
   
-  // Make Will button grow and change color
-  willScale += 0.25;
+  // Calculate boundaries for the middle area
+  const middleAreaLeft = (gameAreaRect.width - middleAreaWidth) / 2;
+  const middleAreaTop = (gameAreaRect.height - middleAreaHeight) / 2;
+  
+  // Calculate max positions within middle area
+  const maxX = middleAreaLeft + middleAreaWidth - buttonRect.width;
+  const maxY = middleAreaTop + middleAreaHeight - buttonRect.height;
+  
+  // Generate random position within middle area
+  const randomX = Math.max(middleAreaLeft, Math.random() * maxX);
+  const randomY = Math.max(middleAreaTop, Math.random() * maxY);
+  
+  // Apply position with smooth animation
+  yesButton.style.left = randomX + "px";
+  yesButton.style.top = randomY + "px";
+  yesButton.style.transition = 'left 0.3s ease, top 0.3s ease';
+  
+  // Make Will button grow
+  willScale += 0.2;
   willButton.style.transform = `scale(${willScale})`;
   
   // Change Will button color for visual feedback
-  const intensity = Math.min(100, clickCount * 20);
-  const red = 255;
-  const green = Math.min(255, 77 + intensity);
-  const blue = Math.min(255, 109 + intensity);
-  willButton.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
+  const intensity = Math.min(150, clickCount * 30);
+  willButton.style.backgroundColor = `rgb(255, ${77 + intensity}, ${109 + intensity})`;
   
   // Add a little bounce effect to Yes button
   setTimeout(() => {
-    yesButton.style.transform = `translate(${randomX}px, ${randomY}px) scale(1.05)`;
+    yesButton.style.transform = 'scale(1.1)';
     setTimeout(() => {
-      yesButton.style.transform = `translate(${randomX}px, ${randomY}px) scale(1)`;
+      yesButton.style.transform = 'scale(1)';
     }, 100);
   }, 50);
 }
