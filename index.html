@@ -110,9 +110,37 @@ button {
   min-height: 32px;
 }
 
-#shareBtn {
+.share-btn {
   background: #b0003a;
   color: white;
+  margin-top: 20px;
+}
+
+.final-message {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  margin: 20px 0;
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.announcement {
+  font-size: 1.8rem;
+  color: #b0003a;
+  font-weight: bold;
+  margin: 25px 0;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 </style>
 </head>
@@ -183,13 +211,13 @@ function startWords() {
 
   main.innerHTML = `
     <h1>Tap to finish the question 💌</h1>
-    <div id="preview"></div>
+    <div id="preview" style="font-size: 1.5rem; margin: 20px 0; min-height: 60px; display: flex; align-items: center; justify-content: center;">will</div>
   `;
 
   const preview = document.getElementById("preview");
-  const words = ["will", "you", "be", "my", "valentine"];
+  const words = ["you", "be", "my", "valentine"];
   let index = 0;
-  let sentence = [];
+  let sentence = ["will"];
 
   const btn = document.createElement("button");
   btn.className = "word-btn";
@@ -204,7 +232,7 @@ function startWords() {
     if (index < words.length) {
       btn.textContent = words[index];
     } else {
-      finalSentence = sentence.join(" ");
+      finalSentence = sentence.join(" ") + "?";
       showFinal();
     }
   });
@@ -212,24 +240,41 @@ function startWords() {
 
 function showFinal() {
   document.getElementById("main").innerHTML = `
-    <h1>💖</h1>
-    <p><strong>${userName}:</strong><br>${finalSentence}</p>
-    <p><strong>${crushName}:</strong><br>wow… I am flattered 💕<br>and I accept 💘</p>
-    <button id="shareBtn" onclick="shareResult()">Share 💌</button>
+    <div class="announcement">📣 EVERYONE LOOK! 📣</div>
+    
+    <div class="final-message">
+      <p style="font-size: 1.8rem; margin-bottom: 15px;">💝 <strong>${userName}</strong> 💝</p>
+      <p style="font-size: 1.4rem; margin: 10px 0;">is officially asking</p>
+      <p style="font-size: 1.8rem; margin: 15px 0;">💘 <strong>${crushName}</strong> 💘</p>
+      <p style="font-size: 1.4rem; margin: 10px 0;">to be their Valentine! 🥰</p>
+    </div>
+    
+    <div class="final-message">
+      <p><strong>${userName}:</strong><br>"${finalSentence}"</p>
+      <p style="margin-top: 15px; color: #ff4d6d; font-weight: bold;">❤️ ${crushName} accepted! ❤️</p>
+    </div>
+    
+    <p style="font-size: 1.1rem; color: #7a0033; margin: 20px 0; font-style: italic;">
+      Love is in the air! 💕 Spread the joy...
+    </p>
+    
+    <button class="share-btn" onclick="shareResult()">Share This Cute News! 💌</button>
   `;
 }
 
 function shareResult() {
-  const text = `${userName}: ${finalSentence}\n\n${crushName}: wow… I am flattered and I accept 💘`;
+  const text = `📣 ATTENTION EVERYONE! 📣\n\n💝 ${userName} 💝 is officially asking 💘 ${crushName} 💘 to be their Valentine!\n\n${userName}: "${finalSentence}"\n\nAnd the best part? ${crushName} said YES! 🥰❤️\n\nSpread the love! 💕`;
 
   if (navigator.share) {
     navigator.share({
-      title: "Valentine 💖",
+      title: "Valentine Announcement 💘",
       text: text,
       url: window.location.href
     });
   } else {
-    alert("Sharing is not supported on this device 💔");
+    // Fallback for browsers that don't support Web Share API
+    const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(shareUrl, '_blank');
   }
 }
 </script>
