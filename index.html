@@ -58,12 +58,30 @@ body {
   text-align: center;
   width: 90%;
   max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 10px;
   z-index: 2;
+}
+
+.container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background: #ff4d6d;
+  border-radius: 10px;
 }
 
 h1 {
   color: #b0003a;
   font-size: 2rem;
+  margin: 10px 0;
 }
 
 input {
@@ -73,6 +91,7 @@ input {
   margin: 10px 0;
   border-radius: 14px;
   border: none;
+  box-sizing: border-box;
 }
 
 button {
@@ -104,43 +123,91 @@ button {
 }
 
 #preview {
-  margin-top: 20px;
+  margin-top: 15px;
   font-size: 1.3rem;
   color: #7a0033;
   min-height: 32px;
+  word-wrap: break-word;
+}
+
+.announcement {
+  font-size: 1.4rem;
+  color: #b0003a;
+  font-weight: bold;
+  margin: 15px 0;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  animation: pulse 1.5s infinite;
+  line-height: 1.4;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.final-message {
+  background: white;
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  margin: 15px 0;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.speech-bubble {
+  position: relative;
+  background: white;
+  border-radius: 15px;
+  padding: 18px;
+  margin: 15px 0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.speech-bubble:after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 20%;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top-color: white;
+  border-bottom: 0;
+  margin-left: -10px;
 }
 
 .share-btn {
   background: #b0003a;
   color: white;
-  margin-top: 20px;
+  margin-top: 15px;
+  padding: 14px 24px;
+  font-size: 1rem;
 }
 
-.final-message {
+.names {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  flex-wrap: wrap;
+}
+
+.name-tag {
   background: white;
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-  margin: 20px 0;
-  font-size: 1.2rem;
-  line-height: 1.6;
-}
-
-.announcement {
-  font-size: 1.8rem;
-  color: #b0003a;
+  padding: 12px 20px;
+  border-radius: 12px;
   font-weight: bold;
-  margin: 25px 0;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 15px;
-  animation: pulse 1.5s infinite;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+.emoji-large {
+  font-size: 1.8rem;
 }
 </style>
 </head>
@@ -211,7 +278,7 @@ function startWords() {
 
   main.innerHTML = `
     <h1>Tap to finish the question 💌</h1>
-    <div id="preview" style="font-size: 1.5rem; margin: 20px 0; min-height: 60px; display: flex; align-items: center; justify-content: center;">will</div>
+    <div id="preview" style="font-size: 1.4rem; margin: 15px 0; min-height: 50px; display: flex; align-items: center; justify-content: center;">will</div>
   `;
 
   const preview = document.getElementById("preview");
@@ -242,28 +309,37 @@ function showFinal() {
   document.getElementById("main").innerHTML = `
     <div class="announcement">📣 EVERYONE LOOK! 📣</div>
     
-    <div class="final-message">
-      <p style="font-size: 1.8rem; margin-bottom: 15px;">💝 <strong>${userName}</strong> 💝</p>
-      <p style="font-size: 1.4rem; margin: 10px 0;">is officially asking</p>
-      <p style="font-size: 1.8rem; margin: 15px 0;">💘 <strong>${crushName}</strong> 💘</p>
-      <p style="font-size: 1.4rem; margin: 10px 0;">to be their Valentine! 🥰</p>
+    <div class="names">
+      <div class="name-tag">💝 ${userName} 💝</div>
+      <div class="emoji-large">❤️</div>
+      <div class="name-tag">💘 ${crushName} 💘</div>
     </div>
     
     <div class="final-message">
-      <p><strong>${userName}:</strong><br>"${finalSentence}"</p>
-      <p style="margin-top: 15px; color: #ff4d6d; font-weight: bold;">❤️ ${crushName} accepted! ❤️</p>
+      <p style="font-size: 1.1rem; margin-bottom: 10px; color: #555;">The big question:</p>
+      <p style="font-size: 1.3rem; font-weight: bold; color: #b0003a;">"${finalSentence}"</p>
+      <p style="font-size: 0.9rem; margin-top: 10px; color: #777;">- asked by ${userName}</p>
     </div>
     
-    <p style="font-size: 1.1rem; color: #7a0033; margin: 20px 0; font-style: italic;">
-      Love is in the air! 💕 Spread the joy...
+    <div class="speech-bubble">
+      <p style="margin-bottom: 10px;"><strong>${crushName} says:</strong></p>
+      <p style="font-size: 1.1rem; color: #d5006d; line-height: 1.6;">
+        wow ${userName}... i don't know what to say 😳<br>
+        i am really speechless right now 🥺<br>
+        and I accept! 💖💘
+      </p>
+    </div>
+    
+    <p style="font-size: 1rem; color: #7a0033; margin: 15px 0; font-style: italic;">
+      A love story begins... 💕✨
     </p>
     
-    <button class="share-btn" onclick="shareResult()">Share This Cute News! 💌</button>
+    <button class="share-btn" onclick="shareResult()">Share This Moment 💌</button>
   `;
 }
 
 function shareResult() {
-  const text = `📣 ATTENTION EVERYONE! 📣\n\n💝 ${userName} 💝 is officially asking 💘 ${crushName} 💘 to be their Valentine!\n\n${userName}: "${finalSentence}"\n\nAnd the best part? ${crushName} said YES! 🥰❤️\n\nSpread the love! 💕`;
+  const text = `📣 ATTENTION EVERYONE! 📣\n\n💝 ${userName} 💝 asked 💘 ${crushName} 💘:\n"${finalSentence}"\n\nAnd ${crushName} replied:\n"wow ${userName}... i don't know what to say 😳 i am really speechless right now 🥺 and I accept! 💖💘"\n\nLove is in the air! 💕`;
 
   if (navigator.share) {
     navigator.share({
