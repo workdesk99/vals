@@ -39,7 +39,6 @@ body {
   justify-content: center;
   align-items: center;
   position: relative;
-  overflow: visible !important;
 }
 
 /* 💕 Floating hearts */
@@ -59,35 +58,14 @@ body {
   text-align: center;
   width: 90%;
   max-width: 420px;
-  max-height: 85vh;
-  overflow-y: auto;
-  padding: 10px;
+  padding: 20px;
   z-index: 2;
-  position: relative;
-  overflow: visible !important;
-}
-
-.container::-webkit-scrollbar {
-  width: 5px;
-}
-
-.container::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-}
-
-.container::-webkit-scrollbar-thumb {
-  background: #ff4d6d;
-  border-radius: 10px;
 }
 
 h1 {
   color: #b0003a;
   font-size: 2rem;
-  margin: 10px 0;
-  position: relative;
-  z-index: 3;
-  overflow: visible;
+  margin: 20px 0;
 }
 
 input {
@@ -107,26 +85,23 @@ button {
   border: none;
   transition: all 0.3s ease;
   cursor: pointer;
-  display: inline-block;
 }
 
 #will {
   background: #ff4d6d;
   color: white;
+  margin: 20px 5px;
+  display: inline-block;
   position: relative;
   z-index: 10;
-  transition: transform 0.3s ease, background-color 0.3s ease;
-  margin: 10px;
-  transform-origin: center;
 }
 
 #yes {
   background: #ff4d6d;
   color: white;
   position: absolute;
-  z-index: 2;
+  z-index: 5;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  margin: 0;
 }
 
 .word-btn {
@@ -232,38 +207,11 @@ button {
   z-index: 2;
 }
 
-.game-area {
-  position: relative;
-  height: 250px;
-  width: 100%;
+.sentence {
+  font-size: 1.8rem;
   margin: 30px 0;
-  border: 2px dashed rgba(255, 77, 109, 0.3);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-
-.center-marker {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  opacity: 0.2;
-  z-index: 1;
-}
-
-.ask-container {
-  position: relative;
-  width: 100%;
-  overflow: visible;
-}
-
-.will-container {
-  position: relative;
-  z-index: 10;
-  overflow: visible;
-  margin: 20px 0;
+  color: #b0003a;
+  font-weight: bold;
 }
 </style>
 </head>
@@ -297,27 +245,18 @@ let willScale = 1;
 let finalSentence = "";
 let willButton = null;
 let yesButton = null;
-let clickCount = 0;
 
 function start() {
   userName = document.getElementById("userName").value || "You";
   crushName = document.getElementById("crushName").value || "Me";
 
   document.getElementById("main").innerHTML = `
-    <div class="ask-container">
-      <h1>
-        Will you be my Valentine? 💖
-      </h1>
-      <div class="will-container">
-        <button id="will">Will</button>
-      </div>
-      <div class="game-area">
-        <div class="center-marker">❤️</div>
-        <button id="yes">Yes</button>
-      </div>
-      <div id="preview"></div>
-      <div class="dodge-message">Try to click "Yes"... it's shy! 😳<br>(Only moves in the middle area)</div>
+    <div class="sentence">
+      <button id="will">Will</button>
+      you be my Valentine? 💖
     </div>
+    <button id="yes">Yes</button>
+    <div class="dodge-message">Try to click "Yes"! 😉</div>
   `;
 
   setupButtons();
@@ -329,125 +268,37 @@ function setupButtons() {
   
   // Reset scale
   willScale = 1;
-  clickCount = 0;
   willButton.style.transform = `scale(${willScale})`;
-  willButton.style.backgroundColor = '#ff4d6d';
 
-  // Set initial position for Yes button in the center
-  positionYesInCenter();
+  // Position Yes button initially
+  moveYes();
 
   // Event listeners for Yes button
-  yesButton.addEventListener("mouseenter", moveYesAroundCenter);
-  yesButton.addEventListener("touchstart", function(e) {
-    e.preventDefault();
-    moveYesAroundCenter();
-  });
+  yesButton.addEventListener("mouseenter", moveYes);
+  yesButton.addEventListener("touchstart", moveYes);
   yesButton.addEventListener("click", function(e) {
     e.preventDefault();
-    clickCount++;
-    
-    // Change the button text based on click count
-    if (clickCount === 1) {
-      yesButton.innerHTML = "Nope! 😅";
-    } else if (clickCount === 2) {
-      yesButton.innerHTML = "Missed! 🎯";
-    } else if (clickCount === 3) {
-      yesButton.innerHTML = "Too slow! 🏃‍♂️";
-    } else {
-      yesButton.innerHTML = "Try again! 💕";
-    }
-    
-    moveYesAroundCenter();
+    moveYes();
   });
 
   // Make Will button clickable to proceed
   willButton.addEventListener("click", startWords);
 }
 
-function positionYesInCenter() {
-  const gameArea = document.querySelector('.game-area');
-  const gameAreaRect = gameArea.getBoundingClientRect();
-  const buttonRect = yesButton.getBoundingClientRect();
+function moveYes() {
+  // Move Yes button randomly on screen
+  const screenWidth = window.innerWidth - 120;
+  const screenHeight = window.innerHeight - 120;
   
-  // Position button in center
-  const centerX = (gameAreaRect.width - buttonRect.width) / 2;
-  const centerY = (gameAreaRect.height - buttonRect.height) / 2;
+  const randomX = Math.max(20, Math.random() * screenWidth);
+  const randomY = Math.max(20, Math.random() * screenHeight);
   
-  yesButton.style.left = centerX + "px";
-  yesButton.style.top = centerY + "px";
-}
-
-function moveYesAroundCenter() {
-  const gameArea = document.querySelector('.game-area');
-  const gameAreaRect = gameArea.getBoundingClientRect();
-  const buttonRect = yesButton.getBoundingClientRect();
-  
-  // Define the middle area (60% of the game area)
-  const middleAreaWidth = gameAreaRect.width * 0.6;
-  const middleAreaHeight = gameAreaRect.height * 0.6;
-  
-  // Calculate boundaries for the middle area
-  const middleAreaLeft = (gameAreaRect.width - middleAreaWidth) / 2;
-  const middleAreaTop = (gameAreaRect.height - middleAreaHeight) / 2;
-  
-  // Calculate max positions within middle area
-  const maxX = middleAreaLeft + middleAreaWidth - buttonRect.width;
-  const maxY = middleAreaTop + middleAreaHeight - buttonRect.height;
-  
-  // Generate random position within middle area
-  const randomX = Math.max(middleAreaLeft, Math.random() * maxX);
-  const randomY = Math.max(middleAreaTop, Math.random() * maxY);
-  
-  // Apply position with smooth animation
   yesButton.style.left = randomX + "px";
   yesButton.style.top = randomY + "px";
-  yesButton.style.transition = 'left 0.3s ease, top 0.3s ease';
   
   // Make Will button grow
-  willScale += 0.25;
-  
-  // Check if Will button would go off-screen
-  const willRect = willButton.getBoundingClientRect();
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  
-  // Calculate button dimensions at current scale
-  const buttonWidth = willRect.width * willScale;
-  const buttonHeight = willRect.height * willScale;
-  
-  // Calculate button position
-  const buttonLeft = willRect.left - (buttonWidth - willRect.width) / 2;
-  const buttonTop = willRect.top - (buttonHeight - willRect.height) / 2;
-  const buttonRight = buttonLeft + buttonWidth;
-  const buttonBottom = buttonTop + buttonHeight;
-  
-  // Check if button stays within viewport bounds (with 10px margin)
-  const margin = 10;
-  const withinViewport = 
-    buttonLeft >= margin &&
-    buttonRight <= viewportWidth - margin &&
-    buttonTop >= margin &&
-    buttonBottom <= viewportHeight - margin;
-  
-  // Only apply scale if button stays within viewport
-  if (withinViewport) {
-    willButton.style.transform = `scale(${willScale})`;
-    
-    // Change Will button color for visual feedback
-    const intensity = Math.min(150, clickCount * 30);
-    willButton.style.backgroundColor = `rgb(255, ${77 + intensity}, ${109 + intensity})`;
-  } else {
-    // If button would go off-screen, don't scale further
-    willScale -= 0.25; // Revert the scale increase
-  }
-  
-  // Add a little bounce effect to Yes button
-  setTimeout(() => {
-    yesButton.style.transform = 'scale(1.1)';
-    setTimeout(() => {
-      yesButton.style.transform = 'scale(1)';
-    }, 100);
-  }, 50);
+  willScale += 0.15;
+  willButton.style.transform = `scale(${willScale})`;
 }
 
 function startWords() {
@@ -506,10 +357,6 @@ function showFinal() {
         and I accept! 💖💘
       </p>
     </div>
-    
-    <p style="font-size: 1rem; color: #7a0033; margin: 15px 0; font-style: italic;">
-      A love story begins... 💕✨
-    </p>
     
     <button class="share-btn" onclick="shareResult()">Share This Moment 💌</button>
   `;
