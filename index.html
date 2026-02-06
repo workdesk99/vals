@@ -101,6 +101,7 @@ button {
   border: none;
   margin: 10px;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 #will {
@@ -108,6 +109,7 @@ button {
   color: white;
   position: relative;
   z-index: 2;
+  transition: transform 0.3s ease;
 }
 
 #yes {
@@ -115,6 +117,7 @@ button {
   color: white;
   position: absolute;
   z-index: 1;
+  cursor: pointer;
 }
 
 .word-btn {
@@ -209,6 +212,13 @@ button {
 .emoji-large {
   font-size: 1.8rem;
 }
+
+.dodge-message {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 10px;
+  font-style: italic;
+}
 </style>
 </head>
 
@@ -239,6 +249,8 @@ let userName = "";
 let crushName = "";
 let willScale = 1;
 let finalSentence = "";
+let willButton = null;
+let yesButton = null;
 
 function start() {
   userName = document.getElementById("userName").value || "You";
@@ -251,26 +263,58 @@ function start() {
     </h1>
     <button id="yes">Yes</button>
     <div id="preview"></div>
+    <div class="dodge-message">Try to click "Yes"... it's shy! 😳</div>
   `;
 
   setupButtons();
 }
 
 function setupButtons() {
-  const willBtn = document.getElementById("will");
-  const yesBtn = document.getElementById("yes");
+  willButton = document.getElementById("will");
+  yesButton = document.getElementById("yes");
+  
+  // Set initial random position for Yes button
+  moveYes();
 
-  yesBtn.addEventListener("mouseenter", moveYes);
-  yesBtn.addEventListener("touchstart", moveYes);
+  // Event listeners for Yes button - move when hovered or clicked
+  yesButton.addEventListener("mouseenter", moveYes);
+  yesButton.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    moveYes();
+  });
+  yesButton.addEventListener("click", function(e) {
+    e.preventDefault();
+    moveYes();
+  });
 
-  function moveYes() {
-    yesBtn.style.left = Math.random() * 220 + "px";
-    yesBtn.style.top = Math.random() * 160 + "px";
-    willScale += 0.35;
-    willBtn.style.transform = `scale(${willScale})`;
-  }
+  // Make Will button clickable to proceed
+  willButton.addEventListener("click", startWords);
+}
 
-  willBtn.addEventListener("click", startWords);
+function moveYes() {
+  // Move Yes button to random position
+  const container = document.querySelector('.container');
+  const containerRect = container.getBoundingClientRect();
+  
+  // Calculate max positions considering button size (approx 100px width, 60px height)
+  const maxX = containerRect.width - 120;
+  const maxY = containerRect.height - 100;
+  
+  const randomX = Math.max(10, Math.random() * maxX);
+  const randomY = Math.max(10, Math.random() * maxY);
+  
+  yesButton.style.left = randomX + "px";
+  yesButton.style.top = randomY + "px";
+  
+  // Make Will button grow
+  willScale += 0.2;
+  willButton.style.transform = `scale(${willScale})`;
+  
+  // Change Will button color slightly to show growth
+  const red = Math.min(255, 255 - Math.floor(willScale * 10));
+  const green = Math.min(255, 77 + Math.floor(willScale * 10));
+  const blue = Math.min(255, 109 + Math.floor(willScale * 5));
+  willButton.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
 }
 
 function startWords() {
